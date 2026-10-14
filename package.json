@@ -1,0 +1,34 @@
+{
+  "name": "stride-atlas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.4.0",
+    "@deck.gl/layers": "^9.4.0",
+    "@deck.gl/react": "^9.4.0",
+    "@deck.gl/widgets": "^9.4.0",
+    "@loaders.gl/core": "^4.4.3",
+    "@luma.gl/core": "^9.4.0",
+    "@luma.gl/engine": "^9.4.0",
+    "@luma.gl/shadertools": "^9.4.0",
+    "fit-file-parser": "^6.2.2",
+    "lucide-react": "^0.468.0",
+    "maplibre-gl": "^6.14.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-is": "^19.2.0",
+    "react-map-gl": "^8.1.0",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.3.0"
+  }
+}
