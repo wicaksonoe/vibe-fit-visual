@@ -210,6 +210,39 @@ export default function ActivityMap({ records, activeIndex = null, onActiveIndex
   ] : [], [highlightedPoint]);
   const displayLayers = [...layers, ...highlightLayers];
   const highlightedRecord = highlightedPoint ? records[highlightedPoint.sourceIndex] : null;
+  const rollingMetrics = useMemo(() => {
+    if (!highlightedPoint) return { speed: null, heartRate: null };
+    const endIndex = highlightedPoint.sourceIndex;
+    const endRecord = records[endIndex];
+    const recordTime = (record, index) => {
+      if (Number.isFinite(Number(record?.timer_time))) return Number(record.timer_time);
+      const timestamp = new Date(record?.timestamp).getTime();
+      return Number.isFinite(timestamp) ? timestamp / 1000 : index;
+    };
+    const endTime = recordTime(endRecord, endIndex);
+    let speedTotal = 0;
+    let speedCount = 0;
+    let heartRateTotal = 0;
+    let heartRateCount = 0;
+    for (let index = endIndex; index >= 0; index -= 1) {
+      const record = records[index];
+      if (endTime - recordTime(record, index) > 180) break;
+      const speed = Number(record?.enhanced_speed ?? record?.speed);
+      if (Number.isFinite(speed)) {
+        speedTotal += speed;
+        speedCount += 1;
+      }
+      const heartRate = Number(record?.heart_rate);
+      if (Number.isFinite(heartRate)) {
+        heartRateTotal += heartRate;
+        heartRateCount += 1;
+      }
+    }
+    return {
+      speed: speedCount ? speedTotal / speedCount : null,
+      heartRate: heartRateCount ? heartRateTotal / heartRateCount : null
+    };
+  }, [highlightedPoint, records]);
   const timelineIndex = activeIndex ?? 0;
   const timelineRecord = records[timelineIndex] || records[0];
   const firstRecord = records[0];
@@ -241,7 +274,7 @@ export default function ActivityMap({ records, activeIndex = null, onActiveIndex
         <b>REPLAY</b>
       </div>}
       {isPlaying && <button className="playback-pause-overlay" onClick={() => setIsPlaying(false)} aria-label="Pause activity replay"><span><Pause size={15}/> Tap to pause</span></button>}
-      {highlightedRecord && <div className="map-hover-metrics"><span>SELECTED SAMPLE</span><b>{number(highlightedRecord.distance, 2)} km</b><dl><div><dt>Elevation</dt><dd>{number(altitude(highlightedRecord) === null ? null : altitude(highlightedRecord) * 1000, 0)} m</dd></div><div><dt>Heart rate</dt><dd>{number(highlightedRecord.heart_rate, 0)} bpm</dd></div><div><dt>Speed</dt><dd>{number(highlightedRecord.enhanced_speed ?? highlightedRecord.speed, 1)} km/h</dd></div></dl></div>}
+      {highlightedRecord && <div className="map-hover-metrics"><span>SELECTED SAMPLE</span><b>{number(highlightedRecord.distance, 2)} km</b><dl><div><dt>Elevation</dt><dd>{number(altitude(highlightedRecord) === null ? null : altitude(highlightedRecord) * 1000, 0)} m</dd></div><div><dt>Heart rate</dt><dd>{rollingMetrics.heartRate === null ? '—' : `${number(rollingMetrics.heartRate, 0)} bpm`}</dd></div><div><dt>Speed</dt><dd>{rollingMetrics.speed === null ? '—' : `${number(rollingMetrics.speed, 0)} km/h`}</dd></div></dl></div>}
     </div>
   </div>;
 }
